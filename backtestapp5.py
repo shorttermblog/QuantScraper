@@ -27,7 +27,7 @@ def compute_RSI(series, window=14):
 
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
-    return rsi
+    return rsi.round(2)
 
 
 # ---------------------------
@@ -37,7 +37,7 @@ def compute_RSI(series, window=14):
 def load_data(ticker, start_date, end_date):
     with st.spinner("Downloading data..."):
         data = yf.download(ticker, start=start_date, end=end_date)
-        df = data.round(4)
+        df = data.round(2)
         # Flatten MultiIndex if necessary
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
@@ -52,9 +52,9 @@ def load_data(ticker, start_date, end_date):
 # Portfolio and Metrics Functions
 # ---------------------------
 def calculate_portfolio(df, initial_capital=0):
-    df['Holdings'] = df['Signal'] * df['Close']
-    df['Cash'] = initial_capital - (df['Position'].fillna(0) * df['Close']).cumsum()
-    df['Portfolio'] = df['Holdings'] + df['Cash']
+    df['Holdings'] = (df['Signal'] * df['Close']).round(2)
+    df['Cash'] = (initial_capital - (df['Position'].fillna(0) * df['Close']).cumsum()).round(2)
+    df['Portfolio'] = (df['Holdings'] + df['Cash']).round(2)
     return df
 
 
@@ -85,7 +85,7 @@ def calculate_trade_log(df):
                 "price entry": open_trade['Close'],
                 "date exit": row['Date'],
                 "price exit": row['Close'],
-                "Return": round(row['Close'] - open_trade['Close'], 4)
+                "Return": round(row['Close'] - open_trade['Close'], 2)
             }
             trades.append(trade)
             open_trade = None
@@ -150,8 +150,8 @@ def execute_strategy(df, strategy, params):
             unsafe_allow_html=True)
         short_window = params.get("short_window")
         long_window = params.get("long_window")
-        df['SMA_short'] = df['Close'].rolling(window=short_window).mean()
-        df['SMA_long'] = df['Close'].rolling(window=long_window).mean()
+        df['SMA_short'] = df['Close'].rolling(window=short_window).mean().round(2)
+        df['SMA_long'] = df['Close'].rolling(window=long_window).mean().round(2)
         df['Signal'] = np.where(df['SMA_short'] > df['SMA_long'], 1, 0)
         df['Position'] = df['Signal'].diff().fillna(0)
 
@@ -164,7 +164,7 @@ def execute_strategy(df, strategy, params):
             unsafe_allow_html=True)
         momentum_window = params.get("momentum_window")
         threshold = params.get("threshold")
-        df['Momentum'] = df['Close'].pct_change(periods=momentum_window)
+        df['Momentum'] = df['Close'].pct_change(periods=momentum_window).round(2)
         df['Signal'] = np.where(df['Momentum'] > threshold, 1, 0)
         df['Position'] = df['Signal'].diff().fillna(0)
 
@@ -180,8 +180,8 @@ def execute_strategy(df, strategy, params):
         df["RSI"] = compute_RSI(df["Close"], window=rsi_window)
         slow_ma = params.get("slow_ma", 50)
         fast_ma = params.get("fast_ma", 10)
-        df["Slow_MA"] = df["Close"].rolling(window=slow_ma).mean()
-        df["Fast_MA"] = df["Close"].rolling(window=fast_ma).mean()
+        df["Slow_MA"] = df["Close"].rolling(window=slow_ma).mean().round(2)
+        df["Fast_MA"] = df["Close"].rolling(window=fast_ma).mean().round(2)
 
         signals = []
         in_position = False
