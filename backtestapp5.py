@@ -85,7 +85,7 @@ def calculate_trade_log(df):
                 "price entry": open_trade['Close'],
                 "date exit": row['Date'],
                 "price exit": row['Close'],
-                "Return": row['Close'] - open_trade['Close']
+                "Return": round(row['Close'] - open_trade['Close'], 4)
             }
             trades.append(trade)
             open_trade = None
