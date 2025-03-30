@@ -4,12 +4,36 @@ import numpy as np
 import datetime
 import yfinance as yf
 from scipy import stats
-import matplotlib.pyplot as plt  # New import for static charting
+import matplotlib.pyplot as plt
 
-# Set page configuration without specifying a wide layout
+# Set page configuration (optional: you can also try layout="wide")
 st.set_page_config(page_title="Strategy Backtest App")
 st.title("Strategy Backtest App")
 
+# ---------------------------------------------
+# Custom CSS for Responsive Design & Sidebar Size
+# ---------------------------------------------
+st.markdown(
+    """
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+    /* Adjust the sidebar’s maximum height and enable vertical scrolling.
+       Note: The CSS class below (.css-1d391kg) may change in future Streamlit versions.
+       Use your browser’s developer tools to update the class if needed. */
+    .css-1d391kg {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    /* Mobile-specific adjustments */
+    @media only screen and (max-width: 600px) {
+        .css-1d391kg {
+            max-height: 80vh;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # ---------------------------
 # Utility Function: Compute RSI
@@ -29,7 +53,6 @@ def compute_RSI(series, window=14):
     rsi = 100 - (100 / (1 + rs))
     return rsi
 
-
 # ---------------------------
 # Data Download Function with Caching & Loading Indicator
 # ---------------------------
@@ -46,7 +69,6 @@ def load_data(ticker, start_date, end_date):
         mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))
         return df.loc[mask]
 
-
 # ---------------------------
 # Portfolio and Metrics Functions
 # ---------------------------
@@ -55,7 +77,6 @@ def calculate_portfolio(df, initial_capital=0):
     df['Cash'] = initial_capital - (df['Position'].fillna(0) * df['Close']).cumsum()
     df['Portfolio'] = df['Holdings'] + df['Cash']
     return df
-
 
 def calculate_trades(df):
     trades = []
@@ -69,7 +90,6 @@ def calculate_trades(df):
             trades.append(trade_profit)
             open_trade = None
     return trades
-
 
 def calculate_trade_log(df):
     trades = []
@@ -89,7 +109,6 @@ def calculate_trade_log(df):
             trades.append(trade)
             open_trade = None
     return trades
-
 
 def compute_metrics(trades):
     if trades:
@@ -117,7 +136,6 @@ def compute_metrics(trades):
         "t_pvalue": t_pvalue
     }
 
-
 # ---------------------------
 # Static Chart Plotting Function using Matplotlib for Equity Line
 # ---------------------------
@@ -134,7 +152,6 @@ def plot_equity_line_static(trades, ticker):
     ax.legend()
     ax.grid(True)
     st.pyplot(fig)
-
 
 # ---------------------------
 # Strategy Execution Function for Extensibility
@@ -200,8 +217,7 @@ def execute_strategy(df, strategy, params):
 
     elif strategy == "Streak Strategy":
         st.markdown(
-            "<h2 style='font-size:20px;'>This strategy buys after a specified number of consecutive closes moving in the same direction "
-            "(up if positive, down if negative)</h2>",
+            "<h2 style='font-size:20px;'>This strategy buys after a specified number of consecutive closes moving in the same direction (up if positive, down if negative)</h2>",
             unsafe_allow_html=True)
         st.markdown(
             "<h2 style='font-size:20px;'> The position is closed after holding the position for a fixed number of days.</h2>",
@@ -242,7 +258,6 @@ def execute_strategy(df, strategy, params):
         df['Position'] = df['Signal'].diff().fillna(0)
 
     return df
-
 
 # ---------------------------
 # Sidebar: Data Settings and Strategy Parameters
@@ -307,7 +322,7 @@ if ticker:
         trade_log = calculate_trade_log(df)
 
         st.subheader("Equity Line")
-        # Replace the interactive Plotly chart with the static Matplotlib chart
+        # Plot static equity curve using Matplotlib
         plot_equity_line_static(trades, ticker)
 
         metrics = compute_metrics(trades)
