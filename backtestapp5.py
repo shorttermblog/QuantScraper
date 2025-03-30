@@ -36,7 +36,8 @@ def compute_RSI(series, window=14):
 @st.cache_data
 def load_data(ticker, start_date, end_date):
     with st.spinner("Downloading data..."):
-        df = yf.download(ticker, start=start_date, end=end_date)
+        data = yf.download(ticker, start=start_date, end=end_date)
+        df = data.round(4)
         # Flatten MultiIndex if necessary
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
