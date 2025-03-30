@@ -127,7 +127,7 @@ def plot_equity_line_static(trades, ticker):
 
     # Create a static chart with the same features and colors
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(trade_numbers, cumulative_equity, marker='o', linestyle='-', label='Equity Curve', color='blue')
+    ax.plot(trade_numbers, cumulative_equity, linestyle='-', label='Equity Curve', color='blue')
     ax.set_title(f"{ticker} Equity Line")
     ax.set_xlabel("Trade Number")
     ax.set_ylabel("Cumulative Profit (Points)")
