@@ -293,6 +293,7 @@ if ticker:
     raw_df = load_data(ticker, start_date, end_date)
     if raw_df.empty:
         st.info(f"No data found for ticker {ticker} between {start_date} and {end_date}.")
+        st.error(f"yfinance download failed")
     else:
         st.sidebar.download_button(label="Download Raw Ticker Data as CSV",
                                    data=raw_df.to_csv(index=False),
