@@ -37,11 +37,7 @@ def compute_RSI(series, window=14):
 def load_data(ticker, start_date, end_date):
     with st.spinner("Downloading data..."):
         
-        try:
-        data = yf.download(...)
-    except Exception as e:
-        st.error(f"yfinance download failed: {e}")
-        return pd.DataFrame()
+
         
         
         try:
