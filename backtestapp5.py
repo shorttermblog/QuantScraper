@@ -34,9 +34,7 @@ def compute_RSI(series, window=14):
 # Data Download Function with Caching & Loading Indicator
 # ---------------------------
 @st.cache_data
-def load_data(ticker, start_date, end_date):
-    end_date = end_date + datetime.timedelta(days=1)
-    
+def load_data(ticker, start_date, end_date):    
     with st.spinner("Downloading data..."):
         data = yf.download(ticker, start=start_date, end=end_date)
         df = data.round(2)
