@@ -36,16 +36,7 @@ def compute_RSI(series, window=14):
 @st.cache_data
 def load_data(ticker, start_date, end_date):
     with st.spinner("Downloading data..."):
-        
-
-        
-        
-        try:
         data = yf.download(ticker, start=start_date, end=end_date)
-        except Exception as e:
-        st.error(f"yfinance download failed: {e}")
-        return pd.DataFrame()
-
         df = data.round(2)
         # Flatten MultiIndex if necessary
         if isinstance(df.columns, pd.MultiIndex):
