@@ -2,6 +2,6 @@ streamlit
 pandas
 numpy
 plotly
-yfinance==0.2.57
+yfinance==0.2.59
 scipy
 matplotlib
