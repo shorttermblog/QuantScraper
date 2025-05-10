@@ -280,7 +280,7 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
         st.markdown("#### Streak Strategy Parameters")
         strategy_params["streak_length"] = st.select_slider(
             "Streak Length (consecutive closes up or down)",
-            options=[-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6],
+            options=[-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             value=3
         )
         strategy_params["holding_period"] = st.slider("Holding Period (days)", min_value=1, max_value=10, value=3,
