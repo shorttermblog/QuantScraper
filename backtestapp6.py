@@ -242,6 +242,36 @@ def execute_strategy(df, strategy, params):
 
         df['Position'] = df['Signal'].diff().fillna(0)
 
+    elif strategy == "MinN Strategy":
+        st.markdown(
+            "<h2 style='font-size:20px;'>The strategy buys when the closing price is the minimum of the last n days</h2>",
+            unsafe_allow_html=True)
+        st.markdown(
+            "<h2 style='font-size:20px;'>The position is closed after holding it for y days</h2>",
+            unsafe_allow_html=True)
+        lookback = params.get("lookback")
+        holding_period = params.get("holding_period")
+        df['Signal'] = 0
+        in_trade = False
+        trade_end_index = None
+        for i in range(len(df)):
+            if in_trade:
+                if i == trade_end_index:
+                    df.at[i, 'Signal'] = 0
+                    in_trade = False
+                else:
+                    df.at[i, 'Signal'] = 1
+                continue
+
+            if i >= lookback - 1:
+                window_min = df['Close'].iloc[i - lookback + 1:i + 1].min()
+                if df.at[i, 'Close'] <= window_min:
+                    df.at[i, 'Signal'] = 1
+                    in_trade = True
+                    trade_end_index = min(i + holding_period, len(df) - 1)
+
+        df['Position'] = df['Signal'].diff().fillna(0)
+
     return df
 
 
@@ -257,7 +287,7 @@ with st.sidebar.expander("Data Settings", expanded=True):
 
 with st.sidebar.expander("Strategy Parameters", expanded=True):
     strategy = st.selectbox("Select Strategy",
-                            options=["Moving Average Crossover", "Momentum", "RSI_MA Strategy", "Streak Strategy"])
+                            options=["Moving Average Crossover", "Momentum", "RSI_MA Strategy", "Streak Strategy", "MinN Strategy"])
     strategy_params = {}
     if strategy == "Moving Average Crossover":
         st.markdown("#### Moving Average Parameters")
@@ -285,6 +315,10 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
         )
         strategy_params["holding_period"] = st.slider("Holding Period (days)", min_value=1, max_value=10, value=3,
                                                       step=1)
+    elif strategy == "MinN Strategy":
+        st.markdown("#### MinN Strategy Parameters")
+        strategy_params["lookback"] = st.slider("Lookback Period (n days)", min_value=2, max_value=100, value=5, step=1)
+        strategy_params["holding_period"] = st.slider("Holding Period (y days)", min_value=1, max_value=10, value=3, step=1)
 
 # ---------------------------
 # Main Execution: Data Download, Strategy, and Visualization
