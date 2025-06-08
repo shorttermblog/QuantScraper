@@ -168,7 +168,7 @@ def execute_strategy(df, strategy, params):
         df['Signal'] = np.where(df['Momentum'] > threshold, 1, 0)
         df['Position'] = df['Signal'].diff().fillna(0)
 
-    elif strategy == "RSI_MA Strategy":
+    elif strategy == "RSI_MA":
         st.markdown(
             "<h2 style='font-size:20px;'>The strategy buys when the RSI is below the threshold and the price is above the Slow Moving Average</h2>",
             unsafe_allow_html=True)
@@ -199,7 +199,7 @@ def execute_strategy(df, strategy, params):
         df["Signal"] = signals
         df["Position"] = df["Signal"].diff().fillna(0)
 
-    elif strategy == "Streak Strategy":
+    elif strategy == "Streak":
         st.markdown(
             "<h2 style='font-size:20px;'>This strategy buys after a specified number of consecutive closes moving in the same direction "
             "(up if positive, down if negative)</h2>",
@@ -242,7 +242,7 @@ def execute_strategy(df, strategy, params):
 
         df['Position'] = df['Signal'].diff().fillna(0)
 
-    elif strategy == "MinN Strategy":
+    elif strategy == "MinN Close":
         st.markdown(
             "<h2 style='font-size:20px;'>The strategy buys when the closing price is the minimum of the last n days</h2>",
             unsafe_allow_html=True)
@@ -272,6 +272,8 @@ def execute_strategy(df, strategy, params):
 
         df['Position'] = df['Signal'].diff().fillna(0)
 
+
+
     return df
 
 
@@ -287,7 +289,7 @@ with st.sidebar.expander("Data Settings", expanded=True):
 
 with st.sidebar.expander("Strategy Parameters", expanded=True):
     strategy = st.selectbox("Select Strategy",
-                            options=["Moving Average Crossover", "Momentum", "RSI_MA Strategy", "Streak Strategy", "MinN Strategy"])
+                            options=["Moving Average Crossover", "Momentum", "RSI_MA", "Streak", "MinN Close"])
     strategy_params = {}
     if strategy == "Moving Average Crossover":
         st.markdown("#### Moving Average Parameters")
@@ -300,13 +302,13 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
         strategy_params["momentum_window"] = st.slider("Momentum Window", min_value=2, max_value=30, value=10, step=1)
         strategy_params["threshold"] = st.slider("Momentum Threshold", min_value=0.0, max_value=0.2, value=0.04,
                                                  step=0.005)
-    elif strategy == "RSI_MA Strategy":
+    elif strategy == "RSI_MA":
         st.markdown("#### RSI_MA Strategy Parameters")
         strategy_params["rsi_window"] = st.slider("RSI Window", min_value=2, max_value=30, value=2, step=1)
         strategy_params["rsi_thresh"] = st.slider("RSI Threshold", min_value=0, max_value=50, value=5, step=1)
         strategy_params["slow_ma"] = st.slider("Slow MA Period", min_value=10, max_value=200, value=200, step=1)
         strategy_params["fast_ma"] = st.slider("Fast MA Period", min_value=3, max_value=50, value=5, step=1)
-    elif strategy == "Streak Strategy":
+    elif strategy == "Streak":
         st.markdown("#### Streak Strategy Parameters")
         strategy_params["streak_length"] = st.select_slider(
             "Streak Length (consecutive closes up or down)",
@@ -315,7 +317,7 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
         )
         strategy_params["holding_period"] = st.slider("Holding Period (days)", min_value=1, max_value=10, value=3,
                                                       step=1)
-    elif strategy == "MinN Strategy":
+    elif strategy == "MinN Close":
         st.markdown("#### MinN Strategy Parameters")
         strategy_params["lookback"] = st.slider("Lookback Period (n days)", min_value=2, max_value=100, value=5, step=1)
         strategy_params["holding_period"] = st.slider("Holding Period (y days)", min_value=1, max_value=10, value=3, step=1)
@@ -373,3 +375,5 @@ if ticker:
                            data=df_display.to_csv(index=False),
                            file_name=f"{ticker}_backtest_data.csv",
                            mime="text/csv")
+
+        #st.dataframe(df)
