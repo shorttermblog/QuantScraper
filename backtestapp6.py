@@ -320,7 +320,7 @@ if ticker:
         col4, col5, col6 = st.columns(3)
         col4.metric("Percentage Wins", f"{round(metrics['percent_wins'], 2)} %")
         col5.metric("Profit Factor", f"{round(metrics['profit_factor'], 2)}")
-        col6.metric("T-Test tscore", f"{round(metrics['t_stat'], 3)}")
+        col6.metric("T-Test t-score", f"{round(metrics['t_stat'], 3)}")
 
         if trade_log:
             st.subheader("Trade List")
