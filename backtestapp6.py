@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt  # New import for static charting
 
 # Set page configuration without specifying a wide layout
 st.set_page_config(page_title="Strategy Backtest App")
-st.title("Strategy Backtest App")
+st.title("Strategy Backtest App6")
 
 
 # ---------------------------
