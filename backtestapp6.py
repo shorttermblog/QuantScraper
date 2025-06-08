@@ -272,6 +272,8 @@ def execute_strategy(df, strategy, params):
 
         df['Position'] = df['Signal'].diff().fillna(0)
 
+        print(df)
+
     return df
 
 
