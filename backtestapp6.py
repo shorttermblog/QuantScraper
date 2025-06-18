@@ -397,7 +397,7 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
 
     elif strategy == "ZScore + EMA":
         st.markdown("#### Z-Score + EMA Strategy Parameters")
-        z_window = st.slider("Z-Score Window",  min_value=0.1, max_value=2, value=1, step=0.1)
+        z_window = st.slider("Z-Score Window",  min_value=1, max_value=3, value=1, step=1)
         ema_span = st.slider("EMA Span",        min_value=2, max_value=20, value=5, step=1)
         max_scale = st.slider("Max Position Scale", min_value=1, max_value=5, value=3, step=1)
         strategy_params["z_window"] = z_window
