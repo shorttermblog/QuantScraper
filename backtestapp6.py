@@ -292,7 +292,7 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
                             options=["Moving Average Crossover", "Momentum", "RSI_MA", "Streak", "Min last n days"])
     strategy_params = {}
     if strategy == "Moving Average Crossover":
-        st.markdown("#### Moving Average Parameters xxx")
+        st.markdown("#### Moving Average Parameters")
         
         strategy_params["long_window"] = st.slider("Long Moving Average Window", min_value=10, max_value=200, value=100,
                                                    step=1)
