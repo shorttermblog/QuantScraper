@@ -275,7 +275,7 @@ def execute_strategy(df, strategy, params):
 
     
 
-   elif strategy == "ZScore + EMA":
+    elif strategy == "ZScore + EMA":
         st.markdown(
             "<h2 style='font-size:20px;'>Buy when 5-day Z-score < -1; pyramid up to 3 lots on fresh lows.</h2>",
             unsafe_allow_html=True)
