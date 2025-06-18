@@ -293,10 +293,13 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
     strategy_params = {}
     if strategy == "Moving Average Crossover":
         st.markdown("#### Moving Average Parameters")
-        strategy_params["short_window"] = st.slider("Short Moving Average Window", min_value=3, max_value=50, value=5,
-                                                    step=1)
+        
         strategy_params["long_window"] = st.slider("Long Moving Average Window", min_value=10, max_value=200, value=100,
                                                    step=1)
+        strategy_params["short_window"] = st.slider("Short Moving Average Window", min_value=3, max_value=strategy_params["long_window"] - 1, 
+                                                    value=min(5, strategy_params["long_window"] - 1),
+                                                    step=1)
+        
     elif strategy == "Momentum":
         st.markdown("#### Momentum Strategy Parameters")
         strategy_params["momentum_window"] = st.slider("Momentum Window", min_value=2, max_value=30, value=10, step=1)
