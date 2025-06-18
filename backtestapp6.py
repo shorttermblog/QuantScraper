@@ -276,63 +276,62 @@ def execute_strategy(df, strategy, params):
     
 
     elif strategy == "ZScore + EMA":
-        st.markdown(
-            "<h2 style='font-size:20px;'>Buy when 5-day Z-score < -1; pyramid up to 3 lots on fresh lows.</h2>",
-            unsafe_allow_html=True)
-        st.markdown(
-            "<h2 style='font-size:20px;'>Exit when price crosses above the 5-day EMA.</h2>",
-            unsafe_allow_html=True)
+       st.markdown(
+           "<h2 style='font-size:20px;'>Buy when 5-day Z-score < -1; pyramid up to 3 lots on fresh lows.</h2>",
+           unsafe_allow_html=True)
+       st.markdown(
+           "<h2 style='font-size:20px;'>Exit when price crosses above the 5-day EMA.</h2>",
+           unsafe_allow_html=True)
 
-        # parameters
-        z_window = params.get("z_window", 5)
-        ema_span = params.get("ema_span", 5)
-        max_scale = params.get("max_scale", 3)
+       # parameters
+       z_window = params.get("z_window", 5)
+       ema_span = params.get("ema_span", 5)
+       max_scale = params.get("max_scale", 3)
 
-        # compute indicators
-        df["ZScore"] = (
-            df["Close"] - df["Close"].rolling(z_window).mean()
-        ) / df["Close"].rolling(z_window).std()
-        df["EMA"] = df["Close"].ewm(span=ema_span, adjust=False).mean()
+       # compute indicators
+       df["ZScore"] = (
+           df["Close"] - df["Close"].rolling(z_window).mean()
+       ) / df["Close"].rolling(z_window).std()
+       df["EMA"] = df["Close"].ewm(span=ema_span, adjust=False).mean()
 
-        # init
-        df["Signal"] = 0
-        position = 0
-        entry_prices = []
+       # initialize signal and position tracking
+       df["Signal"] = 0
+       position = 0
+       entry_prices = []
 
-        # loop: only set Signal
-        for i in range(z_window, len(df)):
-            price = df.at[i, "Close"]
-            z     = df.at[i, "ZScore"]
-            ema   = df.at[i, "EMA"]
+       # loop over data points
+       for i in range(z_window, len(df)):
+           price = df.at[i, "Close"]
+           z_val = df.at[i, "ZScore"]
+           ema_val = df.at[i, "EMA"]
 
-            # exit condition
-            if position > 0 and price > ema:
-                df.at[i, "Signal"] = 0
-                position = 0
-                entry_prices.clear()
-                continue
+           # exit condition: close above EMA resets position
+           if position > 0 and price > ema_val:
+               position = 0
+               df.at[i, "Signal"] = 0
+               entry_prices.clear()
+               continue
 
-            # first entry
-            if position == 0 and z < -1:
-                df.at[i, "Signal"] = 1
-                position = 1
-                entry_prices = [price]
+           # first entry on fresh Z-score low
+           if position == 0 and z_val < -1:
+               position = 1
+               entry_prices = [price]
+               df.at[i, "Signal"] = position
 
-            # pyramid entries
-            elif position > 0 and price < entry_prices[-1] and position < max_scale:
-                df.at[i, "Signal"] = 1
-                position += 1
-                entry_prices.append(price)
+           # pyramid entries on new lows up to max_scale
+           elif position > 0 and price < entry_prices[-1] and position < max_scale:
+               position += 1
+               entry_prices.append(price)
+               df.at[i, "Signal"] = position
 
-            # carry forward
-            elif position > 0:
-                df.at[i, "Signal"] = 1
+           # carry forward current lot count if still in trade
+           elif position > 0:
+               df.at[i, "Signal"] = position
 
-        # fill any gaps
-        df["Signal"].fillna(0, inplace=True)
+       # fill any NaNs in signal and compute Position changes
+       df["Signal"].fillna(0, inplace=True)
+       df["Position"] = df["Signal"].diff().fillna(0)
 
-        # compute Position vectorized so you get +1 and -1
-        df["Position"] = df["Signal"].diff().fillna(0)
 
     
     return df
