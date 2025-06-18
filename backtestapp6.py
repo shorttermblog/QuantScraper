@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt  # New import for static charting
 st.set_page_config(page_title="Strategy Backtest App")
 st.title("Strategy Backtest App")
 
- 
+   
 # ---------------------------
 # Utility Function: Compute RSI
 # ---------------------------
