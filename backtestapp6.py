@@ -273,7 +273,70 @@ def execute_strategy(df, strategy, params):
         df['Position'] = df['Signal'].diff().fillna(0)
 
 
+    
 
+    elif strategy == "ZScore + EMA":
+        st.markdown(
+            "<h2 style='font-size:20px;'>Buy when 5-day Z-score < -1; pyramid up to 3 lots on fresh lows.</h2>",
+            unsafe_allow_html=True)
+        st.markdown(
+            "<h2 style='font-size:20px;'>Exit when price crosses above the 5-day EMA.</h2>",
+            unsafe_allow_html=True)
+
+        # parameters (hard-coded or from params)
+        z_window = params.get("z_window", 5)
+        ema_span = params.get("ema_span", 5)
+        max_scale = params.get("max_scale", 3)
+
+        # compute Z-score & EMA
+        df["ZScore"] = (df["Close"] - df["Close"].rolling(z_window).mean()) \
+                        / df["Close"].rolling(z_window).std()
+        df["EMA"]    = df["Close"].ewm(span=ema_span, adjust=False).mean()
+
+        # init
+        df["Signal"] = 0
+        df["Position"] = 0
+        position = 0
+        entry_prices = []
+
+        for i in range(z_window, len(df)):
+            price = df.at[i, "Close"]
+            z     = df.at[i, "ZScore"]
+            ema   = df.at[i, "EMA"]
+
+            # exit: if in position and price > EMA
+            if position > 0 and price > ema:
+                df.at[i, "Signal"] = 0
+                # position reset next line
+                position = 0
+                entry_prices.clear()
+                continue
+
+            # entry: first lot
+            if position == 0 and z < -1:
+                df.at[i, "Signal"] = 1
+                position = 1
+                entry_prices = [price]
+            # pyramid: new lot on fresh low
+            elif position > 0 \
+                 and price < entry_prices[-1] \
+                 and position < max_scale:
+                df.at[i, "Signal"] = 1
+                entry_prices.append(price)
+                position += 1
+
+            # carry forward existing position
+            if position > 0 and df.at[i, "Signal"] == 0:
+                df.at[i, "Signal"] = 1
+
+            df.at[i, "Position"] = df.at[i, "Signal"] - df.at[i-1, "Signal"]
+
+        # clean up NaNs
+        #df["Signal"].fillna(0, inplace=True)
+        #df["Position"].fillna(0, inplace=True)
+        df['Position'] = df['Signal'].diff().fillna(0)
+
+    
     return df
 
 
@@ -289,7 +352,14 @@ with st.sidebar.expander("Data Settings", expanded=True):
 
 with st.sidebar.expander("Strategy Parameters", expanded=True):
     strategy = st.selectbox("Select Strategy",
-                            options=["Moving Average Crossover", "Momentum", "RSI_MA", "Streak", "Min last n days"])
+                        options=[
+                          "Moving Average Crossover",
+                          "Momentum",
+                          "RSI_MA",
+                          "Streak",
+                          "Min last n days",
+                          "ZScore + EMA"
+                        ])
     strategy_params = {}
     if strategy == "Moving Average Crossover":
         st.markdown("#### Moving Average Parameters")
@@ -324,6 +394,19 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
         st.markdown("#### MinN Strategy Parameters")
         strategy_params["lookback"] = st.slider("Lookback Period (n days)", min_value=2, max_value=100, value=5, step=1)
         strategy_params["holding_period"] = st.slider("Holding Period (y days)", min_value=1, max_value=10, value=3, step=1)
+
+    elif strategy == "ZScore + EMA":
+        st.markdown("#### Z-Score + EMA Strategy Parameters")
+        z_window = st.slider("Z-Score Window",  min_value=0.1, max_value=2, value=1, step=0.1)
+        ema_span = st.slider("EMA Span",        min_value=2, max_value=20, value=5, step=1)
+        max_scale = st.slider("Max Position Scale", min_value=1, max_value=5, value=3, step=1)
+        strategy_params["z_window"] = z_window
+        strategy_params["ema_span"] = ema_span
+        strategy_params["max_scale"] = max_scale
+
+
+
+
 
 # ---------------------------
 # Main Execution: Data Download, Strategy, and Visualization
