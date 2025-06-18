@@ -271,68 +271,6 @@ def execute_strategy(df, strategy, params):
                     trade_end_index = min(i + holding_period, len(df) - 1)
 
         df['Position'] = df['Signal'].diff().fillna(0)
-
-
-    
-
-    elif strategy == "ZScore + EMA":
-       st.markdown(
-           "<h2 style='font-size:20px;'>Buy when 5-day Z-score < -1; pyramid up to 3 lots on fresh lows.</h2>",
-           unsafe_allow_html=True)
-       st.markdown(
-           "<h2 style='font-size:20px;'>Exit when price crosses above the 5-day EMA.</h2>",
-           unsafe_allow_html=True)
-
-       # parameters
-       z_window = params.get("z_window", 5)
-       ema_span = params.get("ema_span", 5)
-       max_scale = params.get("max_scale", 3)
-
-       # compute indicators
-       df["ZScore"] = (
-           df["Close"] - df["Close"].rolling(z_window).mean()
-       ) / df["Close"].rolling(z_window).std()
-       df["EMA"] = df["Close"].ewm(span=ema_span, adjust=False).mean()
-
-       # initialize signal and position tracking
-       df["Signal"] = 0
-       position = 0
-       entry_prices = []
-
-       # loop over data points
-       for i in range(z_window, len(df)):
-           price = df.at[i, "Close"]
-           z_val = df.at[i, "ZScore"]
-           ema_val = df.at[i, "EMA"]
-
-           # exit condition: close above EMA resets position
-           if position > 0 and price > ema_val:
-               position = 0
-               df.at[i, "Signal"] = 0
-               entry_prices.clear()
-               continue
-
-           # first entry on fresh Z-score low
-           if position == 0 and z_val < -1:
-               position = 1
-               entry_prices = [price]
-               df.at[i, "Signal"] = position
-
-           # pyramid entries on new lows up to max_scale
-           elif position > 0 and price < entry_prices[-1] and position < 3:
-               position += 1
-               entry_prices.append(price)
-               df.at[i, "Signal"] = position
-
-           # carry forward current lot count if still in trade
-           elif position > 0:
-               df.at[i, "Signal"] = position
-
-       # fill any NaNs in signal and compute Position changes
-       df["Signal"].fillna(0, inplace=True)
-       df["Position"] = df["Signal"].diff().fillna(0)
-
-
     
     return df
 
@@ -354,8 +292,7 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
                           "Momentum",
                           "RSI_MA",
                           "Streak",
-                          "Min last n days",
-                          "ZScore + EMA"
+                          "Min last n days"
                         ])
     strategy_params = {}
     if strategy == "Moving Average Crossover":
@@ -391,18 +328,6 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
         st.markdown("#### MinN Strategy Parameters")
         strategy_params["lookback"] = st.slider("Lookback Period (n days)", min_value=2, max_value=100, value=5, step=1)
         strategy_params["holding_period"] = st.slider("Holding Period (y days)", min_value=1, max_value=10, value=3, step=1)
-
-    elif strategy == "ZScore + EMA":
-        st.markdown("#### Z-Score + EMA Strategy Parameters")
-        z_window = st.slider("Z-Score Window",  min_value=2, max_value=20, value=5, step=1)
-        ema_span = st.slider("EMA Span",        min_value=2, max_value=20, value=5, step=1)
-        max_scale = st.slider("Max Position Scale", min_value=1, max_value=5, value=3, step=1)
-        strategy_params["z_window"] = z_window
-        strategy_params["ema_span"] = ema_span
-        strategy_params["max_scale"] = max_scale
-
-
-
 
 
 # ---------------------------
