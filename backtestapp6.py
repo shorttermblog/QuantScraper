@@ -319,7 +319,7 @@ def execute_strategy(df, strategy, params):
                df.at[i, "Signal"] = position
 
            # pyramid entries on new lows up to max_scale
-           elif position > 0 and price < entry_prices[-1] and position < max_scale:
+           elif position > 0 and price < entry_prices[-1] and position < 3:
                position += 1
                entry_prices.append(price)
                df.at[i, "Signal"] = position
