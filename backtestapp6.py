@@ -332,9 +332,9 @@ def execute_strategy(df, strategy, params):
             df.at[i, "Position"] = df.at[i, "Signal"] - df.at[i-1, "Signal"]
 
         # clean up NaNs
-        #df["Signal"].fillna(0, inplace=True)
-        #df["Position"].fillna(0, inplace=True)
-        df['Position'] = df['Signal'].diff().fillna(0)
+        df["Signal"].fillna(0, inplace=True)
+        df["Position"].fillna(0, inplace=True)
+        #df['Position'] = df['Signal'].diff().fillna(0)
 
     
     return df
