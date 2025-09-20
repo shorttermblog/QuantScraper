@@ -288,9 +288,9 @@ with st.sidebar.expander("Data Settings", expanded=True):
 with st.sidebar.expander("Strategy Parameters", expanded=True):
     strategy = st.selectbox("Select Strategy",
                         options=[
+                          "RSI_MA",
                           "Moving Average Crossover",
                           "Momentum",
-                          "RSI_MA",
                           "Streak",
                           "Min last n days"
                         ])
@@ -312,7 +312,7 @@ with st.sidebar.expander("Strategy Parameters", expanded=True):
     elif strategy == "RSI_MA":
         st.markdown("#### RSI_MA Strategy Parameters")
         strategy_params["rsi_window"] = st.slider("RSI Window", min_value=2, max_value=30, value=2, step=1)
-        strategy_params["rsi_thresh"] = st.slider("RSI Threshold", min_value=0, max_value=50, value=5, step=1)
+        strategy_params["rsi_thresh"] = st.slider("RSI Threshold", min_value=0, max_value=50, value=25, step=1)
         strategy_params["slow_ma"] = st.slider("Slow MA Period", min_value=10, max_value=200, value=200, step=1)
         strategy_params["fast_ma"] = st.slider("Fast MA Period", min_value=3, max_value=50, value=5, step=1)
     elif strategy == "Streak":
@@ -385,3 +385,4 @@ if ticker:
                            mime="text/csv")
 
         #st.dataframe(df)
+
