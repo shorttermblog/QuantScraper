@@ -279,8 +279,8 @@ def execute_strategy(df, strategy, params):
 # Sidebar: Data Settings and Strategy Parameters
 # ---------------------------
 with st.sidebar.expander("Data Settings", expanded=True):
-    ticker = st.text_input("Enter Ticker Symbol", value="AAPL")
-    fixed_min_date = pd.to_datetime('2000-01-01').date()
+    ticker = st.text_input("Enter Ticker Symbol", value="ES=F")
+    fixed_min_date = pd.to_datetime('2020-01-01').date()
     default_max_date = datetime.date.today()
     start_date = st.date_input("Start Date", value=fixed_min_date, min_value=fixed_min_date, max_value=default_max_date)
     end_date = st.date_input("End Date", value=default_max_date, min_value=fixed_min_date, max_value=default_max_date)
